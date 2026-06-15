@@ -1,0 +1,101 @@
+[build-system]
+requires = ["setuptools >= 80.0.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cv-tda"
+version = "1.0.2"
+authors = [
+  { name = "Aleksandr Abramov", email = "ggttpo100ajiex@yandex.ru" },
+]
+description = "A Library to Solve Various Computer Vision Problems Using Topological Data Analysis"
+readme = "README.md"
+requires-python = ">=3.10, <3.11"
+dependencies = [
+  "giotto-tda",
+  "gudhi",
+  "joblib",
+  "scikit-learn>=1.4",
+  "scikit-image",
+  "tqdm",
+  "numpy"
+]
+keywords = [
+  "topological data analysis",
+  "computer vision",
+  "algebraic topology",
+  "image analysis",
+  "classification",
+  "face recognition",
+  "topological features",
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Intended Audience :: Science/Research",
+  "Intended Audience :: Developers",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3.10",
+  "Topic :: Scientific/Engineering",
+  "Topic :: Scientific/Engineering :: Image Processing",
+]
+license = "MIT"
+license-files = ["LICENSE"]
+
+[project.optional-dependencies]
+classification = [
+  "catboost",
+  "xgboost",
+  "matplotlib",
+  "pandas",
+  "torch",
+  "torchvision",
+]
+facerecognition = [
+  "pytorch-metric-learning",
+  "faiss-cpu",
+  "matplotlib",
+  "torch",
+  "torchvision",
+]
+autoencoder = [
+  "pandas",
+  "torch"
+]
+segmentation = [
+  "pandas",
+  "torch",
+  "segmentation-models-pytorch"
+]
+
+[project.urls]
+Repository  = "https://github.com/TTPO100AJIEX/CVTDA"
+
+[tool.ruff]
+target-version = "py310"
+line-length = 120
+exclude = ["*.ipynb"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "cr-lf"
+
+[tool.ruff.lint]
+ignore = ["E402"]
+
+[tool.ruff.lint.isort]
+force-single-line = true
+relative-imports-order = "closest-to-furthest"
+force-sort-within-sections = true
+case-sensitive = false
+order-by-type = false
+section-order = [
+    "future",
+    "standard-library",
+    "third-party",
+    "first-party",
+    "local-folder",
+]
+no-lines-before = [
+    "local-folder",
+]
