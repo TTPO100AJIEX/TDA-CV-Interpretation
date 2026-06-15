@@ -4,6 +4,7 @@ import gtda.images
 import skimage.data
 
 from cvtda.topology import DiagramVectorizer
+from cvtda.topology import GreyscaleExtractor
 from cvtda.topology import FiltrationExtractor
 
 
@@ -17,10 +18,12 @@ def make_gray():
 
 def make_filtration_extractor(vectorizer_settings: DiagramVectorizer.Settings, return_diagrams: bool):
     return FiltrationExtractor(
-        gtda.images.HeightFiltration,
-        {"direction": numpy.array([1, 1])},
-        0.4,
-        vectorizer_settings,
+        settings=FiltrationExtractor.Settings(
+            filtration_class=gtda.images.HeightFiltration,
+            filtation_kwargs={"direction": numpy.array([1, 1])},
+            binarizer_threshold=0.4,
+            greyscale_settings=GreyscaleExtractor.Settings(vectorizer=vectorizer_settings),
+        ),
         return_diagrams=return_diagrams,
         n_jobs=1,
     )

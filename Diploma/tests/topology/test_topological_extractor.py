@@ -42,6 +42,9 @@ class TopologicalExtractor(cvtda.topology.interface.TopologicalExtractor):
         self.diagrams_calls_.append({"images": images.shape, "do_fit": do_fit, "dump_name": dump_name})
         return DIAGRAMS
 
+    def explain_gray_diagram_(self, *args, **kwargs):
+        pass
+
 
 def test_grayscale_fit():
     def callback_(_):

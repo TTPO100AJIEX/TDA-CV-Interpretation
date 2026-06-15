@@ -94,11 +94,11 @@ class FeatureExtractor(cvtda.utils.FeatureExtractorBase):
 
     def feature_names(self) -> typing.List[str]:
         return [
-            *self.greyscale_.feature_names(),
-            *self.inverted_.feature_names(),
+            *self.nest_feature_names("greyscale", self.greyscale_.feature_names()),
+            *self.nest_feature_names("inverted", self.inverted_.feature_names()),
             *self.filtrations_.feature_names(),
-            *self.point_clouds_.feature_names(),
-            *self.geometry_.feature_names(),
+            *self.nest_feature_names("point_clouds", self.point_clouds_.feature_names()),
+            *self.nest_feature_names("geometry", self.geometry_.feature_names()),
         ]
 
     def fit(self, images: numpy.ndarray, dump_name: typing.Optional[str] = None):
@@ -112,6 +112,23 @@ class FeatureExtractor(cvtda.utils.FeatureExtractorBase):
     def fit_transform(self, images: numpy.ndarray, dump_name: typing.Optional[str] = None):
         result = self.process_(images, do_fit=True, dump_name=dump_name)
         self.fitted_ = True
+        return result
+
+    def explain(self, feature_name: str, image: numpy.ndarray) -> cvtda.utils.FeatureExplanation:
+        assert self.fitted_ is True, "fit() must be called before feature_names()"
+        extractor_name, subfeature_name = self.unnest_feature_name(feature_name)
+        match extractor_name:
+            case "greyscale":
+                result = self.greyscale_.explain(subfeature_name, image)
+            case "inverted":
+                result = self.inverted_.explain(subfeature_name, image)
+            case "point_clouds":
+                result = self.point_clouds_.explain(subfeature_name, image)
+            case "geometry":
+                result = self.geometry_.explain(subfeature_name, image)
+            case __:
+                result = self.filtrations_.explain(feature_name, image)
+        result.feature_name = feature_name
         return result
 
     def process_(self, images: numpy.ndarray, do_fit: bool, dump_name: typing.Optional[str] = None):

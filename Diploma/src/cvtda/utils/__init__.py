@@ -1,5 +1,6 @@
 from .duplicates import DuplicateFeaturesRemover
 from .FeatureExtractorBase import FeatureExtractorBase
+from .FeatureExtractorBase import FeatureExplanation
 from .image2pointcloud import image2pointcloud
 from .rgb2gray import rgb2gray
 from .rgb2hsv import rgb2hsv
@@ -11,6 +12,7 @@ from .parallel import parallel
 __all__ = [
     "DuplicateFeaturesRemover",
     "FeatureExtractorBase",
+    "FeatureExplanation",
     "image2pointcloud",
     "rgb2gray",
     "rgb2hsv",

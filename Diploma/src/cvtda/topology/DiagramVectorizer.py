@@ -57,6 +57,23 @@ class Vectorizer(cvtda.utils.FeatureExtractorBase):
         assert self.fitted_ is True, "fit() must be called before feature_names()"
         return self.feature_names_
 
+    def explain(self, feature_name: str, diagram: numpy.ndarray) -> cvtda.utils.FeatureExplanation:
+        if (diagram[:, 1] - diagram[:, 0] > 0).sum() == 0:
+            return cvtda.utils.FeatureExplanation(feature_name=feature_name, messages=["Persistence diagram is empty"])
+        feature_idx = int(feature_name)
+        original = self.transform(numpy.array([diagram]))[0][feature_idx]
+        stats = []
+        for i in range(len(diagram)):
+            cpy = diagram.copy()
+            cpy[i][0] = 0.0
+            cpy[i][1] = 0.0
+            computed = self.transform(numpy.array([cpy]))[0][feature_idx]
+            stats.append(numpy.abs(original - computed))
+        explanation = cvtda.utils.FeatureExplanation.PersistenceDiagram(
+            diagram=diagram.copy(), per_point_stats=numpy.array(stats)
+        )
+        return cvtda.utils.FeatureExplanation(feature_name=feature_name, persistence_diagrams=[explanation])
+
 
 class SequenceStats(Vectorizer):
     """
@@ -187,7 +204,7 @@ class Landscape(SequenceStats):
         super().__init__([impl], settings.enabled, settings.reduced_stats)
 
     def transform(self, diagrams: numpy.ndarray) -> numpy.ndarray:
-        assert self.fitted_ is True, "fit() must be called before feature_names()"
+        assert self.fitted_ is True, "fit() must be called before transform()"
         if len(self.impl_) == 0:
             return numpy.empty((len(diagrams), 0))
         impl: gtda.diagrams.PersistenceLandscape = self.impl_[0]
@@ -370,6 +387,14 @@ class NumberOfPoints(Proxy):
 
     def __init__(self, settings=Settings()):
         super().__init__(gtda.diagrams.NumberOfPoints(n_jobs=1), settings.enabled)
+
+    def explain(self, feature_name: str, diagram: numpy.ndarray) -> cvtda.utils.FeatureExplanation:
+        feature_idx = int(feature_name)
+        features = self.transform(numpy.array([diagram]))[0]
+        return cvtda.utils.FeatureExplanation(
+            feature_name=feature_name,
+            messages=[f"Number of points in the H{feature_idx} diagram is {features[feature_idx]}"],
+        )
 
 
 class Lifetime(SequenceStats):
@@ -572,9 +597,10 @@ class DiagramVectorizer(cvtda.utils.FeatureExtractorBase):
         features = cvtda.utils.parallel(transform_batch, loop, return_as="generator", n_jobs=self.n_jobs_)
         collector = cvtda.logging.logger().pbar(features, total=len(loop), desc="DiagramVectorizer: batch")
         features = numpy.vstack(list(collector))
-        assert features.shape == (len(diagrams), len(self.feature_names())), (
-            f"{features.shape} != {(len(diagrams), len(self.feature_names()))}"
-        )
+        assert features.shape == (
+            len(diagrams),
+            len(self.feature_names()),
+        ), f"{features.shape} != {(len(diagrams), len(self.feature_names()))}"
         return features
 
     def get_batch_size_(self, num_objects: int):
@@ -616,3 +642,11 @@ class DiagramVectorizer(cvtda.utils.FeatureExtractorBase):
 
         batch = self.filtering_.transform(batch)
         return numpy.hstack([extractor.transform(batch) for extractor in self.extractors_])
+
+    def explain(self, feature_name: str, diagram: numpy.ndarray) -> cvtda.utils.FeatureExplanation:
+        assert self.fitted_ is True, "fit() must be called before explain()"
+        extractor_name, subfeature_name = self.unnest_feature_name(feature_name)
+        extractor_idx = DiagramVectorizer.EXTRACTOR_NAMES.index(extractor_name)
+        result = self.extractors_[extractor_idx].explain(subfeature_name, diagram)
+        result.feature_name = self.nest_feature_name(extractor_name, result.feature_name)
+        return result

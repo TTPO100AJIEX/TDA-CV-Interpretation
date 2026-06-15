@@ -20,11 +20,11 @@ class NumpyDumper(BaseDumper[numpy.ndarray]):
         return os.path.join(self.directory_, f"{name}.npy")
 
     def execute(
-        self, function: typing.Callable[[typing.Any], numpy.ndarray], name: str, *function_args
+        self, function: typing.Callable[[typing.Any], numpy.ndarray], name: str, *function_args, **function_kwargs
     ) -> numpy.ndarray:
         if self.has_dump(name):
             return self.get_dump(name)
-        result = function(*function_args)
+        result = function(*function_args, **function_kwargs)
         self.save_dump(result, name)
         return result
 

@@ -79,6 +79,29 @@ class Extractor(cvtda.utils.FeatureExtractorBase, abc.ABC):
         self.fitted_ = True
         return result
 
+    def explain(self, feature_name: str, image: numpy.ndarray) -> cvtda.utils.FeatureExplanation:
+        with cvtda.logging.DevNullLogger():
+            if self.is_rgb_(self.fit_dimensions_):
+                extractor_name, subfeature_name = self.unnest_feature_name(feature_name)
+                match extractor_name:
+                    case "rgb":
+                        result = self.explain_rgb_(subfeature_name, image)
+                    case "gray":
+                        gray_image = cvtda.utils.rgb2gray([image], 1)[0]
+                        result = self.gray_extractor_.explain(subfeature_name, gray_image)
+                    case "red":
+                        result = self.red_extractor_.explain(subfeature_name, image[:, :, 0])
+                    case "green":
+                        result = self.green_extractor_.explain(subfeature_name, image[:, :, 1])
+                    case "blue":
+                        result = self.blue_extractor_.explain(subfeature_name, image[:, :, 2])
+                    case _:
+                        assert False, f"Feature name {feature_name} is malformed"
+                result.feature_name = self.nest_feature_name(extractor_name, result.feature_name)
+                return result
+            else:
+                return self.explain_gray_(feature_name, image)
+
     def is_rgb_(self, shape) -> bool:
         return (len(shape) == 3) and (shape[2] == 3)
 
@@ -103,9 +126,9 @@ class Extractor(cvtda.utils.FeatureExtractorBase, abc.ABC):
 
         # Ensure `transform` got the same image format as `fit`.
         if self.fit_dimensions_ is not None:
-            assert self.fit_dimensions_ == images.shape[1:], (
-                f"The pipeline is fit for {self.fit_dimensions_}. Cannot use it with {images.shape}."
-            )
+            assert (
+                self.fit_dimensions_ == images.shape[1:]
+            ), f"The pipeline is fit for {self.fit_dimensions_}. Cannot use it with {images.shape}."
         self.fit_dimensions_ = images.shape[1:]
 
         # Handle dumping.
@@ -216,4 +239,12 @@ class Extractor(cvtda.utils.FeatureExtractorBase, abc.ABC):
         ``list[str]``
             Feature names.
         """
+        pass
+
+    @abc.abstractmethod
+    def explain_rgb_(self, feature_name: str, image: numpy.ndarray) -> cvtda.utils.FeatureExplanation:
+        pass
+
+    @abc.abstractmethod
+    def explain_gray_(self, feature_name: str, image: numpy.ndarray) -> cvtda.utils.FeatureExplanation:
         pass

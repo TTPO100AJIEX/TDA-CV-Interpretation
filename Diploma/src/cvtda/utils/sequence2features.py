@@ -75,7 +75,4 @@ def sequence2features(sequence_batch: numpy.ndarray, reduced: bool = True) -> nu
     if reduced:
         return base
 
-    if isinstance(sequence_batch, numpy.ma.core.MaskedArray):
-        return numpy.ma.hstack([base, extension_(sequence_batch)])
-    else:
-        return numpy.hstack([base, extension_(sequence_batch)])
+    return numpy.hstack([base, extension_(sequence_batch)])

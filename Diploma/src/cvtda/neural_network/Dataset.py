@@ -3,7 +3,11 @@ import typing
 import numpy
 import torch
 import torch.utils.data
-import torchph.nn.slayer
+
+try:
+    import torchph.nn.slayer
+except ImportError:
+    pass
 
 import cvtda.utils
 import cvtda.logging

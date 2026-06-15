@@ -29,6 +29,12 @@ class Extractor(cvtda.topology.interface.Extractor):
     def feature_names_gray_(self):
         return ["a", "b"]
 
+    def explain_gray_(self, *args, **kwargs):
+        pass
+
+    def explain_rgb_(self, *args, **kwargs):
+        pass
+
 
 def test_grayscale_fit():
     def callback_(_):

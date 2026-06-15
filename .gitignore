@@ -2,6 +2,8 @@
 .vscode
 .DS_Store
 
+*.pt
+*.pth
 *.iws
 *.iml
 *.ipr
@@ -10,6 +12,7 @@
 *.tgz
 *.tar
 *.npy
+*.npz
 *.fif
 *.xes
 *.feather
@@ -19,12 +22,14 @@ val/
 data/
 wandb/
 mnist/
+gtsrb/
 train/
 cifar-10/
 dataset/
 __pycache__/
 .pytest_cache/
 dataset_small/
+fashion_mnist/
 catboost_info/
 lightning_logs/
 

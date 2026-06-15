@@ -10,7 +10,7 @@ class DevNullDumper(BaseDumper[T]):
     A dumper that actually does not save anything.
     """
 
-    def execute(self, function: typing.Callable[[typing.Any], T], name: str, *function_args) -> T:
+    def execute(self, function: typing.Callable[[typing.Any], T], name: str, *function_args, **function_kwargs) -> T:
         return function(*function_args)
 
     def save_dump(self, data: T, name: str):

@@ -7,10 +7,9 @@ Defines 'default_device' for operations with :mod:`torch`.
 
 import torch
 
-
 if torch.cuda.is_available():
     default_device = torch.device("cuda")
-elif torch.mps.is_available():
+elif torch.backends.mps.is_available():
     default_device = torch.device("mps")
 else:
     default_device = torch.device("cpu")

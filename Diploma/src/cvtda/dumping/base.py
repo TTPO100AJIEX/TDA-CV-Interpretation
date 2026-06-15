@@ -20,7 +20,7 @@ class BaseDumper(abc.ABC, typing.Generic[T]):
         BaseDumper.current_dumper = self.__previous
 
     @abc.abstractmethod
-    def execute(self, function: typing.Callable[[typing.Any], T], name: str, *function_args) -> T:
+    def execute(self, function: typing.Callable[[typing.Any], T], name: str, *function_args, **function_kwargs) -> T:
         """
         Gets the result from dump, if available, or executes the function and dumps the output.
 
@@ -71,7 +71,7 @@ class BaseDumper(abc.ABC, typing.Generic[T]):
         """
         pass
 
-    def get_dump(self, name: str) -> T:
+    def get_dump(self, name: str, *args) -> T:
         """
         Ensures the dump with a given name is available and gets it.
         Throws :exc:`AssertionError` if the dump is not available.
@@ -87,7 +87,7 @@ class BaseDumper(abc.ABC, typing.Generic[T]):
             The contents of the dump.
         """
         assert self.has_dump(name), f"There is no dump at {name}"
-        return self.get_dump_impl_(name)
+        return self.get_dump_impl_(name, *args)
 
     @abc.abstractmethod
     def get_dump_impl_(self, name: str) -> T:
